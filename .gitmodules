@@ -7,3 +7,6 @@
 [submodule "p256/lib/kernel"]
 	path = p256/lib/kernel
 	url = https://github.com/zerodevapp/kernel
+[submodule "p256/lib/p256-verifier"]
+	path = p256/lib/p256-verifier
+	url = https://github.com/daimo-eth/p256-verifier
