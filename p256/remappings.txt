@@ -1,0 +1,9 @@
+@openzeppelin/contracts/=lib/p256-verifier/lib/openzeppelin-contracts/contracts/
+I4337/=lib/kernel/lib/I4337/src/
+ds-test/=lib/forge-std/lib/ds-test/src/
+erc4626-tests/=lib/p256-verifier/lib/openzeppelin-contracts/lib/erc4626-tests/
+forge-std/=lib/forge-std/src/
+kernel/=lib/kernel/
+openzeppelin-contracts/=lib/p256-verifier/lib/openzeppelin-contracts/
+p256-verifier/=lib/p256-verifier/
+solady/=lib/solady/src/

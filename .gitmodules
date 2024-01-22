@@ -10,3 +10,9 @@
 [submodule "p256/lib/p256-verifier"]
 	path = p256/lib/p256-verifier
 	url = https://github.com/daimo-eth/p256-verifier
+[submodule "p256/lib/FreshCryptoLib"]
+	path = p256/lib/FreshCryptoLib
+	url = https://github.com/rdubois-crypto/FreshCryptoLib
+[submodule "p256/lib/solady"]
+	path = p256/lib/solady
+	url = https://github.com/vectorized/solady
