@@ -16,3 +16,9 @@
 [submodule "p256/lib/solady"]
 	path = p256/lib/solady
 	url = https://github.com/vectorized/solady
+[submodule "stealthAddress/lib/solady"]
+	path = stealthAddress/lib/solady
+	url = https://github.com/vectorized/solady
+[submodule "stealthAddress/lib/kernel"]
+	path = stealthAddress/lib/kernel
+	url = https://github.com/zerodevapp/kernel
