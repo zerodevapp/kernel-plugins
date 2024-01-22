@@ -4,3 +4,6 @@
 [submodule "stealthAddress/lib/forge-std"]
 	path = stealthAddress/lib/forge-std
 	url = https://github.com/foundry-rs/forge-std
+[submodule "p256/lib/kernel"]
+	path = p256/lib/kernel
+	url = https://github.com/zerodevapp/kernel
