@@ -6,10 +6,10 @@ import "kernel/src/Kernel.sol";
 // test artifacts
 // test utils
 import "forge-std/Test.sol";
-import {ERC4337Utils} from "kernel/test/foundry/utils/ERC4337Utils.sol";
-import {KernelTestBase} from "kernel/test/foundry/KernelTestBase.sol";
-import {TestExecutor} from "kernel/test/foundry/mock/TestExecutor.sol";
-import {TestValidator} from "kernel/test/foundry/mock/TestValidator.sol";
+import {ERC4337Utils} from "kernel/src/utils/ERC4337Utils.sol";
+import {KernelTestBase} from "kernel/src/utils/KernelTestBase.sol";
+import {TestExecutor} from "kernel/src/mock/TestExecutor.sol";
+import {TestValidator} from "kernel/src/mock/TestValidator.sol";
 import {P256Validator} from "src/P256Validator.sol";
 import {P256Verifier} from "p256-verifier/src/P256Verifier.sol";
 import {P256} from "p256-verifier/src/P256.sol";
@@ -30,6 +30,7 @@ contract P256ValidatorTest is KernelTestBase {
 
     function setUp() public {
         p256Validator = new P256Validator();
+        defaultValidator = p256Validator;
         p256Verifier = new P256Verifier();
 
         vm.etch(0xc2b78104907F722DABAc4C69f826a522B2754De4, address(p256Verifier).code);
@@ -126,7 +127,7 @@ contract P256ValidatorTest is KernelTestBase {
 
     function generateSignature(uint256 privateKey, bytes32 hash) internal view returns (uint256 r, uint256 s) {
         // Securely generate a random k value for each signature
-        uint256 k = uint256(keccak256(abi.encodePacked(hash, block.timestamp, block.difficulty, privateKey))) % n;
+        uint256 k = uint256(keccak256(abi.encodePacked(hash, block.timestamp, block.prevrandao, privateKey))) % n;
         while (k == 0) {
             k = uint256(keccak256(abi.encodePacked(k))) % n;
         }

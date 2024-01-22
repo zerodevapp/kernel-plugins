@@ -4,9 +4,6 @@
 [submodule "stealthAddress/lib/forge-std"]
 	path = stealthAddress/lib/forge-std
 	url = https://github.com/foundry-rs/forge-std
-[submodule "p256/lib/kernel"]
-	path = p256/lib/kernel
-	url = https://github.com/zerodevapp/kernel
 [submodule "p256/lib/p256-verifier"]
 	path = p256/lib/p256-verifier
 	url = https://github.com/daimo-eth/p256-verifier
@@ -19,6 +16,9 @@
 [submodule "stealthAddress/lib/solady"]
 	path = stealthAddress/lib/solady
 	url = https://github.com/vectorized/solady
+[submodule "p256/lib/kernel"]
+	path = p256/lib/kernel
+	url = https://github.com/zerodevapp/kernel
 [submodule "stealthAddress/lib/kernel"]
 	path = stealthAddress/lib/kernel
 	url = https://github.com/zerodevapp/kernel

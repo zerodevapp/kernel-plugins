@@ -6,5 +6,6 @@ solc_version = '0.8.21'
 evm_version = 'paris'
 bytecode_hash = "none"
 cbor_metadata = false
+via_ir = true
 
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options

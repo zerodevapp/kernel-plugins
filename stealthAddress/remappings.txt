@@ -2,5 +2,4 @@ I4337/=lib/kernel/lib/I4337/src/
 ds-test/=lib/forge-std/lib/ds-test/src/
 forge-std/=lib/forge-std/src/
 kernel/=lib/kernel/
-p256-verifier/=lib/kernel/lib/p256-verifier/src/
 solady/=lib/solady/src/

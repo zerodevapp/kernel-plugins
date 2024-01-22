@@ -9,9 +9,9 @@ import {IKernel} from "kernel/src/interfaces/IKernel.sol";
 import {StealthAddressValidator} from "src/StealthAddressValidator.sol";
 import {EllipticCurve} from "src/EllipticCurve.sol";
 // test utils
-import {KernelTestBase} from "kernel/test/foundry/KernelTestBase.sol";
-import {TestExecutor} from "kernel/test/foundry/mock/TestExecutor.sol";
-import {TestValidator} from "kernel/test/foundry/mock/TestValidator.sol";
+import {KernelTestBase} from "kernel/src/utils/KernelTestBase.sol";
+import {TestExecutor} from "kernel/src/mock/TestExecutor.sol";
+import {TestValidator} from "kernel/src/mock/TestValidator.sol";
 import {parseValidationData} from "kernel/src/common/Types.sol";
 import "forge-std/Vm.sol";
 
