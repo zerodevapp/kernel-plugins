@@ -37,7 +37,7 @@ contract WebAuthnValidatorTest is KernelTestBase {
 
     function setUp() public {
         webAuthnValidator = new WebAuthnValidator();
-        defaultValidator = webAuthnValidator; // TODO: do we need this?
+        defaultValidator = webAuthnValidator;
         p256Verifier = new P256Verifier();
 
         vm.etch(0xc2b78104907F722DABAc4C69f826a522B2754De4, address(p256Verifier).code);
