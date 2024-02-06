@@ -3,10 +3,10 @@
 pragma solidity ^0.8.0;
 
 import {UserOperation} from "I4337/interfaces/UserOperation.sol";
-import {WebAuthn} from "p256-verifier/src/WebAuthn.sol";
 import {IKernelValidator} from "kernel/src/interfaces/IKernelValidator.sol";
 import {ValidationData} from "kernel/src/common/Types.sol";
 import {SIG_VALIDATION_FAILED} from "kernel/src/common/Constants.sol";
+import {WebAuthn} from "./WebAuthn.sol";
 
 // public key
 struct WebAuthnValidatorData {

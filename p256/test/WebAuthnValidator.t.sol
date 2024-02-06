@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+import "forge-std/console.sol";
 import {IEntryPoint} from "I4337/interfaces/IEntryPoint.sol";
 import "kernel/src/Kernel.sol";
 // test artifacts
@@ -97,6 +98,14 @@ contract WebAuthnValidatorTest is KernelTestBase {
         );
     }
 
+    function test_example() external {
+        webAuthnValidator.verifyTest(
+            msg.sender,
+            bytes32(0xb3f1c72f4b3bf050089c2e4946454d0443052b5c1196a97cb5624716350a2d92),
+            "0x0000000000000000000000000000000000000000000000000000000000000000000000c0000000000000000000000000000000000000000000000000000000000000012000000000000000000000000000000000000000000000000000000000000000170000000000000000000000000000000000000000000000000000000000000001156d1100a2ddf89de3d57424d1e49ae472d8ec16864576d56706b04c758b1f1c1e1685fcd0b30f0687951b88ddf5a31398a0b5316258939022fd846d6b7f1184000000000000000000000000000000000000000000000000000000000000002549960de5880e8c687434170f6476605b8fe4aeb9a28632c7995cf3ba831d97631d0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000867b2274797065223a22776562617574686e2e676574222c226368616c6c656e6765223a22735f48484c307337384641496e43354a526b564e42454d464b3177526c716c3874574a48466a554b4c5a49222c226f726967696e223a22687474703a2f2f6c6f63616c686f73743a35313733222c2263726f73734f726967696e223a66616c73657d0000000000000000000000000000000000000000000000000000"
+        );
+    }
+
     function test_default_validator_enable() external override {
         UserOperation memory op = buildUserOperation(
             abi.encodeWithSelector(
@@ -115,6 +124,23 @@ contract WebAuthnValidatorTest is KernelTestBase {
         bytes memory signature = encodeSignature(
             authenticatorData, clientDataJSON, findChallengeLocation(clientDataJSON), responseTypeLocation, r, s
         );
+
+        uint256 getChallengeLocation = findChallengeLocation(clientDataJSON);
+        console.log("authenticatorData");
+        console.logBytes(authenticatorData);
+        console.log("clientDataJSON");
+        console.logString(clientDataJSON);
+        console.log("chllengeLocation");
+        console.logUint(getChallengeLocation);
+        console.log("responseTypeLocation");
+        console.logUint(responseTypeLocation);
+        console.log("r value");
+        console.logUint(r);
+        console.log("s value");
+        console.logUint(s);
+
+        console.log("signature");
+        console.logBytes(signature);
 
         op.signature = signature;
 
@@ -210,7 +236,7 @@ contract WebAuthnValidatorTest is KernelTestBase {
             abi.encodePacked(
                 '{"type":"webauthn.get","challenge":"',
                 encodedChallenge,
-                '","origin":"https://funny-froyo-3f9b75.netlify.app"}'
+                '","origin":"https://funny-froyo-3f9b75.netlify.app","crossOrigin":false}'
             )
         );
     }
