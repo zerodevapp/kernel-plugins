@@ -125,20 +125,18 @@ library WebAuthn {
         uint256 x,
         uint256 y
     ) internal view returns (bool) {
-        /// @notice if challengeLocation is set to max, it means that signature is dummy signature. so we bypass the signature format check
-        if (challengeLocation == type(uint256).max) {
-            return P256.verifySignature(bytes32(challenge), r, s, x, y);
-        }
+        /// @notice defer the result to the end so dummy signature can go through all verification process including p256.verifySignature
+        bool deferredResult = true;
 
         // Check that authenticatorData has good flags
         if (authenticatorData.length < 37 || !checkAuthFlags(authenticatorData[32], requireUserVerification)) {
-            return false;
+            deferredResult = false;
         }
 
         // Check that response is for an authentication assertion
         string memory responseType = '"type":"webauthn.get"';
         if (!contains(responseType, clientDataJSON, responseTypeLocation)) {
-            return false;
+            deferredResult = false;
         }
 
         // Check that challenge is in the clientDataJSON
@@ -146,13 +144,18 @@ library WebAuthn {
         string memory challengeProperty = string.concat('"challenge":"', challengeB64url, '"');
 
         if (!contains(challengeProperty, clientDataJSON, challengeLocation)) {
-            return false;
+            deferredResult = false;
         }
 
         // Check that the public key signed sha256(authenticatorData || sha256(clientDataJSON))
         bytes32 clientDataJSONHash = sha256(bytes(clientDataJSON));
         bytes32 messageHash = sha256(abi.encodePacked(authenticatorData, clientDataJSONHash));
 
-        return P256.verifySignature(messageHash, r, s, x, y);
+        bool verified = P256.verifySignature(messageHash, r, s, x, y);
+
+        if (verified && deferredResult) {
+            return true;
+        }
+        return false;
     }
 }

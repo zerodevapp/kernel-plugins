@@ -6,7 +6,8 @@ pragma solidity ^0.8.0;
  *
  */
 library P256 {
-    address constant VERIFIER = 0xc2b78104907F722DABAc4C69f826a522B2754De4;
+    // address constant VERIFIER = 0xc2b78104907F722DABAc4C69f826a522B2754De4;
+    address constant VERIFIER = 0x0000000000000000000000000000000000000100;
 
     function verifySignatureAllowMalleability(bytes32 message_hash, uint256 r, uint256 s, uint256 x, uint256 y)
         internal
@@ -15,8 +16,11 @@ library P256 {
     {
         bytes memory args = abi.encode(message_hash, r, s, x, y);
         (bool success, bytes memory ret) = VERIFIER.staticcall(args);
-        assert(success); // never reverts, always returns 0 or 1
 
+        if (success == false || ret.length == 0) {
+            return false;
+        }
+        
         return abi.decode(ret, (uint256)) == 1;
     }
 
