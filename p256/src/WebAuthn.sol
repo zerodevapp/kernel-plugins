@@ -123,7 +123,8 @@ library WebAuthn {
         uint256 r,
         uint256 s,
         uint256 x,
-        uint256 y
+        uint256 y,
+        bool usePrecompiled
     ) internal view returns (bool) {
         /// @notice defer the result to the end so dummy signature can go through all verification process including p256.verifySignature
         bool deferredResult = true;
@@ -151,7 +152,7 @@ library WebAuthn {
         bytes32 clientDataJSONHash = sha256(bytes(clientDataJSON));
         bytes32 messageHash = sha256(abi.encodePacked(authenticatorData, clientDataJSONHash));
 
-        bool verified = P256.verifySignature(messageHash, r, s, x, y);
+        bool verified = P256.verifySignature(messageHash, r, s, x, y, usePrecompiled);
 
         if (verified && deferredResult) {
             return true;

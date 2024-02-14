@@ -60,7 +60,7 @@ contract WebAuthnValidator is IKernelValidator {
         external
         payable
         override
-        returns (ValidationData validationData)
+        returns (ValidationData)
     {
         return _verifySignature(_userOp.sender, _userOpHash, _userOp.signature);
     }
@@ -92,8 +92,9 @@ contract WebAuthnValidator is IKernelValidator {
             uint256 challengeLocation,
             uint256 responseTypeLocation,
             uint256 r,
-            uint256 s
-        ) = abi.decode(signature, (bytes, string, uint256, uint256, uint256, uint256));
+            uint256 s,
+            bool usePrecompiled
+        ) = abi.decode(signature, (bytes, string, uint256, uint256, uint256, uint256, bool));
 
         // get the public key from storage
         WebAuthnValidatorData memory pubKey = webAuthnValidatorStorage[sender];
@@ -109,7 +110,8 @@ contract WebAuthnValidator is IKernelValidator {
             r,
             s,
             pubKey.x,
-            pubKey.y
+            pubKey.y,
+            usePrecompiled
         );
 
         // return the validation data

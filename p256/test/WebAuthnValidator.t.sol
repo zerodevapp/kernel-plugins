@@ -64,9 +64,11 @@ contract WebAuthnValidatorTest is KernelTestBase {
 
         (uint256 r, uint256 s) = generateSignature(ownerKey, webAuthnHash);
 
+        bool usePrecompiled = generateUsePrecompiled(false);
+
         return abi.encodePacked(
             bytes4(0x00000000),
-            abi.encode(authenticatorData, clientDataJSON, challengeLocation, responseTypeLocation, r, s)
+            abi.encode(authenticatorData, clientDataJSON, challengeLocation, responseTypeLocation, r, s, usePrecompiled)
         );
     }
 
@@ -90,11 +92,12 @@ contract WebAuthnValidatorTest is KernelTestBase {
         uint256 challengeLocation,
         uint256 responseTypeLocation,
         uint256 r,
-        uint256 s
+        uint256 s,
+        bool usePrecompiled
     ) internal pure returns (bytes memory) {
         return abi.encodePacked(
             bytes4(0x00000000),
-            abi.encode(authenticatorData, clientDataJSON, challengeLocation, responseTypeLocation, r, s)
+            abi.encode(authenticatorData, clientDataJSON, challengeLocation, responseTypeLocation, r, s, usePrecompiled)
         );
     }
 
@@ -113,26 +116,16 @@ contract WebAuthnValidatorTest is KernelTestBase {
         string memory clientDataJSON = createClientDataJSON(userOpHash);
         bytes32 webAuthnHash = generateWebAuthnHash(authenticatorData, clientDataJSON);
         (uint256 r, uint256 s) = generateSignature(ownerKey, webAuthnHash);
+        bool usePrecompiled = generateUsePrecompiled(false);
         bytes memory signature = encodeSignature(
-            authenticatorData, clientDataJSON, findChallengeLocation(clientDataJSON), responseTypeLocation, r, s
+            authenticatorData,
+            clientDataJSON,
+            findChallengeLocation(clientDataJSON),
+            responseTypeLocation,
+            r,
+            s,
+            usePrecompiled
         );
-
-        uint256 getChallengeLocation = findChallengeLocation(clientDataJSON);
-        console.log("authenticatorData");
-        console.logBytes(authenticatorData);
-        console.log("clientDataJSON");
-        console.logString(clientDataJSON);
-        console.log("chllengeLocation");
-        console.logUint(getChallengeLocation);
-        console.log("responseTypeLocation");
-        console.logUint(responseTypeLocation);
-        console.log("r value");
-        console.logUint(r);
-        console.log("s value");
-        console.logUint(s);
-
-        console.log("signature");
-        console.logBytes(signature);
 
         op.signature = signature;
 
@@ -158,8 +151,15 @@ contract WebAuthnValidatorTest is KernelTestBase {
         string memory clientDataJSON = createClientDataJSON(userOpHash);
         bytes32 webAuthnHash = generateWebAuthnHash(authenticatorData, clientDataJSON);
         (uint256 r, uint256 s) = generateSignature(ownerKey, webAuthnHash);
+        bool usePrecompiled = generateUsePrecompiled(false);
         bytes memory signature = encodeSignature(
-            authenticatorData, clientDataJSON, findChallengeLocation(clientDataJSON), responseTypeLocation, r, s
+            authenticatorData,
+            clientDataJSON,
+            findChallengeLocation(clientDataJSON),
+            responseTypeLocation,
+            r,
+            s,
+            usePrecompiled
         );
 
         op.signature = signature;
@@ -207,6 +207,10 @@ contract WebAuthnValidatorTest is KernelTestBase {
         }
 
         return (r, s);
+    }
+
+    function generateUsePrecompiled(bool usePrecompiled) internal pure returns (bool) {
+        return usePrecompiled;
     }
 
     function generateWebAuthnHash(bytes memory authenticatorData, string memory clientDataJSON)
@@ -267,17 +271,24 @@ contract WebAuthnValidatorTest is KernelTestBase {
         bytes32 webAuthnHash = generateWebAuthnHash(authenticatorData, clientDataJSON);
 
         (uint256 r, uint256 s) = generateSignature(ownerKey, webAuthnHash);
+        bool usePrecompiled = generateUsePrecompiled(false);
 
         assertEq(
             kernel.isValidSignature(
-                hash, abi.encode(authenticatorData, clientDataJSON, challengeLocation, responseTypeLocation, r, s)
+                hash,
+                abi.encode(
+                    authenticatorData, clientDataJSON, challengeLocation, responseTypeLocation, r, s, usePrecompiled
+                )
             ),
             Kernel.isValidSignature.selector
         );
 
         assertEq(
             kernel2.isValidSignature(
-                hash, abi.encode(authenticatorData, clientDataJSON, challengeLocation, responseTypeLocation, r, s)
+                hash,
+                abi.encode(
+                    authenticatorData, clientDataJSON, challengeLocation, responseTypeLocation, r, s, usePrecompiled
+                )
             ),
             bytes4(0xffffffff)
         );
@@ -295,9 +306,10 @@ contract WebAuthnValidatorTest is KernelTestBase {
         string memory clientDataJSON = createClientDataJSON(hash);
         bytes32 webAuthnHash = generateWebAuthnHash(authenticatorData, clientDataJSON);
         (uint256 r, uint256 s) = generateSignature(ownerKey, webAuthnHash);
+        bool usePrecompiled = generateUsePrecompiled(false);
         return abi.encodePacked(
             bytes4(0x00000000),
-            abi.encode(authenticatorData, clientDataJSON, challengeLocation, responseTypeLocation, r, s)
+            abi.encode(authenticatorData, clientDataJSON, challengeLocation, responseTypeLocation, r, s, usePrecompiled)
         );
     }
 
@@ -307,9 +319,10 @@ contract WebAuthnValidatorTest is KernelTestBase {
         string memory clientDataJSON = createClientDataJSON(hash);
         bytes32 webAuthnHash = generateWebAuthnHash(authenticatorData, clientDataJSON);
         (uint256 r, uint256 s) = generateSignature(ownerKey + 1, webAuthnHash);
+        bool usePrecompiled = generateUsePrecompiled(false);
         return abi.encodePacked(
             bytes4(0x00000000),
-            abi.encode(authenticatorData, clientDataJSON, challengeLocation, responseTypeLocation, r, s)
+            abi.encode(authenticatorData, clientDataJSON, challengeLocation, responseTypeLocation, r, s, usePrecompiled)
         );
     }
 
@@ -319,8 +332,10 @@ contract WebAuthnValidatorTest is KernelTestBase {
         bytes32 webAuthnHash = generateWebAuthnHash(authenticatorData, clientDataJSON);
 
         (uint256 r, uint256 s) = generateSignature(ownerKey, webAuthnHash);
+        bool usePrecompiled = generateUsePrecompiled(false);
 
-        return abi.encode(authenticatorData, clientDataJSON, challengeLocation, responseTypeLocation, r, s);
+        return
+            abi.encode(authenticatorData, clientDataJSON, challengeLocation, responseTypeLocation, r, s, usePrecompiled);
     }
 
     function getWrongSignature(bytes32 hash) internal view override returns (bytes memory) {
@@ -328,7 +343,9 @@ contract WebAuthnValidatorTest is KernelTestBase {
         string memory clientDataJSON = createClientDataJSON(hash);
         bytes32 webAuthnHash = generateWebAuthnHash(authenticatorData, clientDataJSON);
         (uint256 r, uint256 s) = generateSignature(ownerKey + 1, webAuthnHash);
-        return abi.encode(authenticatorData, clientDataJSON, challengeLocation, responseTypeLocation, r, s);
+        bool usePrecompiled = generateUsePrecompiled(false);
+        return
+            abi.encode(authenticatorData, clientDataJSON, challengeLocation, responseTypeLocation, r, s, usePrecompiled);
     }
 
     function verifyPublicKey(uint256 actualX, uint256 actualY, uint256 expectedX, uint256 expectedY) internal {
