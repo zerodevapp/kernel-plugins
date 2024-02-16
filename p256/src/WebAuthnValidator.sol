@@ -23,7 +23,7 @@ contract WebAuthnValidator is IKernelValidator {
     error InvalidPublicKey();
 
     // Emitted when the public key of a kernel is changed.
-    event WebAuthnPublicKeyChanged(address indexed kernel, WebAuthnValidatorData newPubKey);
+    event WebAuthnPublicKeyChanged(address indexed kernel, uint256 pubKeyX, uint256 pubKeyY);
 
     // The P256 public keys of a kernel.
     mapping(address kernel => WebAuthnValidatorData WebAuthnValidatorData) public webAuthnValidatorStorage;
@@ -42,7 +42,7 @@ contract WebAuthnValidator is IKernelValidator {
         // Update the key (so a sstore)
         webAuthnValidatorStorage[msg.sender] = pubKey;
         // And emit the event
-        emit WebAuthnPublicKeyChanged(msg.sender, pubKey);
+        emit WebAuthnPublicKeyChanged(msg.sender, pubKey.x, pubKey.y);
     }
 
     /**
