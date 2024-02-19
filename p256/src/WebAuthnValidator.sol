@@ -19,6 +19,8 @@ struct WebAuthnValidatorData {
  * @notice This validator uses the P256 curve to validate signatures.
  */
 contract WebAuthnValidator is IKernelValidator {
+    uint256 constant CHALLENGE_LOCATION = 23;
+
     // Emitted when a bad key is provided.
     error InvalidPublicKey();
 
@@ -89,12 +91,11 @@ contract WebAuthnValidator is IKernelValidator {
         (
             bytes memory authenticatorData,
             string memory clientDataJSON,
-            uint256 challengeLocation,
             uint256 responseTypeLocation,
             uint256 r,
             uint256 s,
             bool usePrecompiled
-        ) = abi.decode(signature, (bytes, string, uint256, uint256, uint256, uint256, bool));
+        ) = abi.decode(signature, (bytes, string, uint256, uint256, uint256, bool));
 
         // get the public key from storage
         WebAuthnValidatorData memory pubKey = webAuthnValidatorStorage[sender];
@@ -105,7 +106,7 @@ contract WebAuthnValidator is IKernelValidator {
             authenticatorData,
             true,
             clientDataJSON,
-            challengeLocation,
+            CHALLENGE_LOCATION,
             responseTypeLocation,
             r,
             s,
