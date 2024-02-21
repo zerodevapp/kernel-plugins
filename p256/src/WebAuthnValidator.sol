@@ -25,7 +25,9 @@ contract WebAuthnValidator is IKernelValidator {
     error InvalidPublicKey();
 
     // Emitted when the public key of a kernel is changed.
-    event WebAuthnPublicKeyChanged(address indexed kernel, uint256 pubKeyX, uint256 pubKeyY);
+    event WebAuthnPublicKeyChanged(
+        address indexed kernel, bytes32 indexed authenticatorIdHash, uint256 pubKeyX, uint256 pubKeyY
+    );
 
     // The P256 public keys of a kernel.
     mapping(address kernel => WebAuthnValidatorData WebAuthnValidatorData) public webAuthnValidatorStorage;
@@ -37,14 +39,15 @@ contract WebAuthnValidator is IKernelValidator {
      */
     function enable(bytes calldata _data) external payable override {
         // check validity of the public key
-        WebAuthnValidatorData memory pubKey = abi.decode(_data, (WebAuthnValidatorData));
+        (WebAuthnValidatorData memory pubKey, bytes32 authenticatorIdHash) =
+            abi.decode(_data, (WebAuthnValidatorData, bytes32));
         if (pubKey.x == 0 || pubKey.y == 0) {
             revert InvalidPublicKey();
         }
         // Update the key (so a sstore)
         webAuthnValidatorStorage[msg.sender] = pubKey;
         // And emit the event
-        emit WebAuthnPublicKeyChanged(msg.sender, pubKey.x, pubKey.y);
+        emit WebAuthnPublicKeyChanged(msg.sender, authenticatorIdHash, pubKey.x, pubKey.y);
     }
 
     /**
