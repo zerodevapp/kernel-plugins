@@ -68,12 +68,12 @@ contract WebAuthnValidatorTest is KernelTestBase {
 
         return abi.encodePacked(
             bytes4(0x00000000),
-            abi.encode(authenticatorData, clientDataJSON, challengeLocation, responseTypeLocation, r, s, usePrecompiled)
+            abi.encode(authenticatorData, clientDataJSON, responseTypeLocation, r, s, usePrecompiled)
         );
     }
 
     function getInitializeData() internal view override returns (bytes memory) {
-        return abi.encodeWithSelector(KernelStorage.initialize.selector, webAuthnValidator, abi.encode(x, y));
+        return abi.encodeWithSelector(KernelStorage.initialize.selector, webAuthnValidator, abi.encode(x, y, ""));
     }
 
     function getOwners() internal view override returns (address[] memory) {
@@ -89,7 +89,6 @@ contract WebAuthnValidatorTest is KernelTestBase {
     function encodeSignature(
         bytes memory authenticatorData,
         string memory clientDataJSON,
-        uint256 challengeLocation,
         uint256 responseTypeLocation,
         uint256 r,
         uint256 s,
@@ -97,7 +96,7 @@ contract WebAuthnValidatorTest is KernelTestBase {
     ) internal pure returns (bytes memory) {
         return abi.encodePacked(
             bytes4(0x00000000),
-            abi.encode(authenticatorData, clientDataJSON, challengeLocation, responseTypeLocation, r, s, usePrecompiled)
+            abi.encode(authenticatorData, clientDataJSON, responseTypeLocation, r, s, usePrecompiled)
         );
     }
 
@@ -107,7 +106,7 @@ contract WebAuthnValidatorTest is KernelTestBase {
                 IKernel.execute.selector,
                 address(webAuthnValidator),
                 0,
-                abi.encodeWithSelector(WebAuthnValidator.enable.selector, abi.encode(x, y)),
+                abi.encodeWithSelector(WebAuthnValidator.enable.selector, abi.encode(x, y), keccak256("hello world")),
                 Operation.Call
             )
         );
@@ -117,15 +116,8 @@ contract WebAuthnValidatorTest is KernelTestBase {
         bytes32 webAuthnHash = generateWebAuthnHash(authenticatorData, clientDataJSON);
         (uint256 r, uint256 s) = generateSignature(ownerKey, webAuthnHash);
         bool usePrecompiled = generateUsePrecompiled(false);
-        bytes memory signature = encodeSignature(
-            authenticatorData,
-            clientDataJSON,
-            findChallengeLocation(clientDataJSON),
-            responseTypeLocation,
-            r,
-            s,
-            usePrecompiled
-        );
+        bytes memory signature =
+            encodeSignature(authenticatorData, clientDataJSON, responseTypeLocation, r, s, usePrecompiled);
 
         op.signature = signature;
 
@@ -142,7 +134,7 @@ contract WebAuthnValidatorTest is KernelTestBase {
                 IKernel.execute.selector,
                 address(webAuthnValidator),
                 0,
-                abi.encodeWithSelector(WebAuthnValidator.disable.selector, ""),
+                abi.encodeWithSelector(WebAuthnValidator.disable.selector, "", ""),
                 Operation.Call
             )
         );
@@ -152,15 +144,8 @@ contract WebAuthnValidatorTest is KernelTestBase {
         bytes32 webAuthnHash = generateWebAuthnHash(authenticatorData, clientDataJSON);
         (uint256 r, uint256 s) = generateSignature(ownerKey, webAuthnHash);
         bool usePrecompiled = generateUsePrecompiled(false);
-        bytes memory signature = encodeSignature(
-            authenticatorData,
-            clientDataJSON,
-            findChallengeLocation(clientDataJSON),
-            responseTypeLocation,
-            r,
-            s,
-            usePrecompiled
-        );
+        bytes memory signature =
+            encodeSignature(authenticatorData, clientDataJSON, responseTypeLocation, r, s, usePrecompiled);
 
         op.signature = signature;
 
@@ -275,20 +260,14 @@ contract WebAuthnValidatorTest is KernelTestBase {
 
         assertEq(
             kernel.isValidSignature(
-                hash,
-                abi.encode(
-                    authenticatorData, clientDataJSON, challengeLocation, responseTypeLocation, r, s, usePrecompiled
-                )
+                hash, abi.encode(authenticatorData, clientDataJSON, responseTypeLocation, r, s, usePrecompiled)
             ),
             Kernel.isValidSignature.selector
         );
 
         assertEq(
             kernel2.isValidSignature(
-                hash,
-                abi.encode(
-                    authenticatorData, clientDataJSON, challengeLocation, responseTypeLocation, r, s, usePrecompiled
-                )
+                hash, abi.encode(authenticatorData, clientDataJSON, responseTypeLocation, r, s, usePrecompiled)
             ),
             bytes4(0xffffffff)
         );
@@ -309,7 +288,7 @@ contract WebAuthnValidatorTest is KernelTestBase {
         bool usePrecompiled = generateUsePrecompiled(false);
         return abi.encodePacked(
             bytes4(0x00000000),
-            abi.encode(authenticatorData, clientDataJSON, challengeLocation, responseTypeLocation, r, s, usePrecompiled)
+            abi.encode(authenticatorData, clientDataJSON, responseTypeLocation, r, s, usePrecompiled)
         );
     }
 
@@ -322,7 +301,7 @@ contract WebAuthnValidatorTest is KernelTestBase {
         bool usePrecompiled = generateUsePrecompiled(false);
         return abi.encodePacked(
             bytes4(0x00000000),
-            abi.encode(authenticatorData, clientDataJSON, challengeLocation, responseTypeLocation, r, s, usePrecompiled)
+            abi.encode(authenticatorData, clientDataJSON, responseTypeLocation, r, s, usePrecompiled)
         );
     }
 
@@ -334,8 +313,7 @@ contract WebAuthnValidatorTest is KernelTestBase {
         (uint256 r, uint256 s) = generateSignature(ownerKey, webAuthnHash);
         bool usePrecompiled = generateUsePrecompiled(false);
 
-        return
-            abi.encode(authenticatorData, clientDataJSON, challengeLocation, responseTypeLocation, r, s, usePrecompiled);
+        return abi.encode(authenticatorData, clientDataJSON, responseTypeLocation, r, s, usePrecompiled);
     }
 
     function getWrongSignature(bytes32 hash) internal view override returns (bytes memory) {
@@ -344,8 +322,7 @@ contract WebAuthnValidatorTest is KernelTestBase {
         bytes32 webAuthnHash = generateWebAuthnHash(authenticatorData, clientDataJSON);
         (uint256 r, uint256 s) = generateSignature(ownerKey + 1, webAuthnHash);
         bool usePrecompiled = generateUsePrecompiled(false);
-        return
-            abi.encode(authenticatorData, clientDataJSON, challengeLocation, responseTypeLocation, r, s, usePrecompiled);
+        return abi.encode(authenticatorData, clientDataJSON, responseTypeLocation, r, s, usePrecompiled);
     }
 
     function verifyPublicKey(uint256 actualX, uint256 actualY, uint256 expectedX, uint256 expectedY) internal {
