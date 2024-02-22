@@ -8,10 +8,10 @@ import {ValidationData} from "kernel/src/common/Types.sol";
 import {SIG_VALIDATION_FAILED} from "kernel/src/common/Constants.sol";
 import {WebAuthn} from "./WebAuthn.sol";
 
-// public key
 struct WebAuthnValidatorData {
-    uint256 x;
-    uint256 y;
+    uint256 pubKeyX;
+    uint256 pubKeyY;
+    bool usePrecompiled;
 }
 
 /**
@@ -39,15 +39,15 @@ contract WebAuthnValidator is IKernelValidator {
      */
     function enable(bytes calldata _data) external payable override {
         // check validity of the public key
-        (WebAuthnValidatorData memory pubKey, bytes32 authenticatorIdHash) =
+        (WebAuthnValidatorData memory webAuthnData, bytes32 authenticatorIdHash) =
             abi.decode(_data, (WebAuthnValidatorData, bytes32));
-        if (pubKey.x == 0 || pubKey.y == 0) {
+        if (webAuthnData.pubKeyX == 0 || webAuthnData.pubKeyY == 0) {
             revert InvalidPublicKey();
         }
         // Update the key (so a sstore)
-        webAuthnValidatorStorage[msg.sender] = pubKey;
+        webAuthnValidatorStorage[msg.sender] = webAuthnData;
         // And emit the event
-        emit WebAuthnPublicKeyChanged(msg.sender, authenticatorIdHash, pubKey.x, pubKey.y);
+        emit WebAuthnPublicKeyChanged(msg.sender, authenticatorIdHash, webAuthnData.pubKeyX, webAuthnData.pubKeyY);
     }
 
     /**
@@ -96,12 +96,11 @@ contract WebAuthnValidator is IKernelValidator {
             string memory clientDataJSON,
             uint256 responseTypeLocation,
             uint256 r,
-            uint256 s,
-            bool usePrecompiled
-        ) = abi.decode(signature, (bytes, string, uint256, uint256, uint256, bool));
+            uint256 s
+        ) = abi.decode(signature, (bytes, string, uint256, uint256, uint256));
 
         // get the public key from storage
-        WebAuthnValidatorData memory pubKey = webAuthnValidatorStorage[sender];
+        WebAuthnValidatorData memory webAuthnData = webAuthnValidatorStorage[sender];
 
         // verify the signature using the signature and the public key
         bool isValid = WebAuthn.verifySignature(
@@ -113,9 +112,9 @@ contract WebAuthnValidator is IKernelValidator {
             responseTypeLocation,
             r,
             s,
-            pubKey.x,
-            pubKey.y,
-            usePrecompiled
+            webAuthnData.pubKeyX,
+            webAuthnData.pubKeyY,
+            webAuthnData.usePrecompiled
         );
 
         // return the validation data
