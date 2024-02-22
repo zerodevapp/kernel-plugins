@@ -64,7 +64,7 @@ contract P256ValidatorTest is KernelTestBase {
     }
 
     function getInitializeData() internal view override returns (bytes memory) {
-        return abi.encodeWithSelector(KernelStorage.initialize.selector, p256Validator, abi.encode(x, y));
+        return abi.encodeWithSelector(KernelStorage.initialize.selector, p256Validator, abi.encode(x, y, false));
     }
 
     function test_default_validator_enable() external override {
@@ -73,12 +73,12 @@ contract P256ValidatorTest is KernelTestBase {
                 IKernel.execute.selector,
                 address(p256Validator),
                 0,
-                abi.encodeWithSelector(P256Validator.enable.selector, abi.encode(x, y)),
+                abi.encodeWithSelector(P256Validator.enable.selector, abi.encode(x, y, false)),
                 Operation.Call
             )
         );
         performUserOperationWithSig(op);
-        (uint256 x2, uint256 y2) = P256Validator(address(p256Validator)).p256PublicKey(address(kernel));
+        (uint256 x2, uint256 y2,) = P256Validator(address(p256Validator)).p256ValidatorData(address(kernel));
         verifyPublicKey(x2, y2, x, y);
     }
 
@@ -93,7 +93,7 @@ contract P256ValidatorTest is KernelTestBase {
             )
         );
         performUserOperationWithSig(op);
-        (uint256 x2, uint256 y2) = P256Validator(address(p256Validator)).p256PublicKey(address(kernel));
+        (uint256 x2, uint256 y2,) = P256Validator(address(p256Validator)).p256ValidatorData(address(kernel));
         verifyPublicKey(x2, y2, 0, 0);
     }
 
