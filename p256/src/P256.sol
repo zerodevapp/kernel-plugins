@@ -26,8 +26,7 @@ library P256 {
             }
             return abi.decode(ret, (uint256)) == 1;
         } else {
-            (bool success, bytes memory ret) = DAIMO_VERIFIER.staticcall(args);
-            assert(success); // never reverts, always returns 0 or 1
+            (, bytes memory ret) = DAIMO_VERIFIER.staticcall(args);
             return abi.decode(ret, (uint256)) == 1;
         }
     }
