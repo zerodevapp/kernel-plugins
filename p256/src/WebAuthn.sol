@@ -152,11 +152,6 @@ library WebAuthn {
         bytes32 clientDataJSONHash = sha256(bytes(clientDataJSON));
         bytes32 messageHash = sha256(abi.encodePacked(authenticatorData, clientDataJSONHash));
 
-        // if responseTypeLocation is set to max, it means the signature is a dummy signature
-        if (responseTypeLocation == type(uint256).max) {
-            return P256.verifySignature(messageHash, r, s, x, y, false);
-        }
-
         bool verified = P256.verifySignature(messageHash, r, s, x, y, usePrecompiled);
 
         if (verified && deferredResult) {
