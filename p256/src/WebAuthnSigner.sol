@@ -9,21 +9,24 @@ import {SIG_VALIDATION_FAILED} from "kernel/src/common/Constants.sol";
 struct WebAuthnValidatorData {
     uint256 x;
     uint256 y;
+    bool usePrecompiled;
 }
 
 contract WebAuthnSigner is ISigner {
+    uint256 constant CHALLENGE_LOCATION = 23;
+
     mapping(address caller => mapping(bytes32 permissionId => mapping(address kernel => WebAuthnValidatorData))) public
         webAuthnValidatorStorage;
 
     function registerSigner(address kernel, bytes32 permissionId, bytes calldata data) external payable override {
-        WebAuthnValidatorData memory pubKey = abi.decode(data, (WebAuthnValidatorData));
+        WebAuthnValidatorData memory webAuthnData = abi.decode(data, (WebAuthnValidatorData));
         require(
             webAuthnValidatorStorage[msg.sender][permissionId][kernel].x == 0
                 && webAuthnValidatorStorage[msg.sender][permissionId][kernel].y == 0,
             "WebAuthnSigner: kernel already registered"
         );
-        require(pubKey.x != 0 && pubKey.y != 0, "WebAuthnSigner: invalid public key");
-        webAuthnValidatorStorage[msg.sender][permissionId][kernel] = pubKey;
+        require(webAuthnData.x != 0 && webAuthnData.y != 0, "WebAuthnSigner: invalid public key");
+        webAuthnValidatorStorage[msg.sender][permissionId][kernel] = webAuthnData;
     }
 
     function validateUserOp(address kernel, bytes32 permissionId, bytes32 userOpHash, bytes calldata signature)
@@ -52,28 +55,26 @@ contract WebAuthnSigner is ISigner {
         (
             bytes memory authenticatorData,
             string memory clientDataJSON,
-            uint256 challengeLocation,
             uint256 responseTypeLocation,
             uint256 r,
-            uint256 s,
-            bool usePrecompiled
-        ) = abi.decode(signature, (bytes, string, uint256, uint256, uint256, uint256, bool));
+            uint256 s
+        ) = abi.decode(signature, (bytes, string, uint256, uint256, uint256));
 
-        WebAuthnValidatorData memory pubKey = webAuthnValidatorStorage[msg.sender][permissionId][sender];
-        require(pubKey.x != 0 && pubKey.y != 0, "WebAuthnSigner: kernel not registered");
+        WebAuthnValidatorData memory webAuthnData = webAuthnValidatorStorage[msg.sender][permissionId][sender];
+        require(webAuthnData.x != 0 && webAuthnData.y != 0, "WebAuthnSigner: kernel not registered");
 
         bool isValid = WebAuthn.verifySignature(
             abi.encodePacked(hash),
             authenticatorData,
-            true, // TODO: check if this needs to be true always
+            true,
             clientDataJSON,
-            challengeLocation,
+            CHALLENGE_LOCATION,
             responseTypeLocation,
             r,
             s,
-            pubKey.x,
-            pubKey.y,
-            usePrecompiled
+            webAuthnData.x,
+            webAuthnData.y,
+            webAuthnData.usePrecompiled
         );
 
         if (isValid) {
